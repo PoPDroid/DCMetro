@@ -1,7 +1,5 @@
 var map;
-var stationarr1 = [];
-var stationarr2 = [];
-var stationarr3 = [];
+var stationarrs = [];
 var linkdurations = [];
 var startmarker;
 var stopmarker;
@@ -17,12 +15,146 @@ var maxstops = 2;
 var stationnames = [];
 var mingroupedroute;
 var mylocation = false;
-var searchingdest =false;
-var searchingstart =false;
+var searchingdest = false;
+var searchingstart = false;
 var inputstart;
 var inputdest;
 var mapcentrelat = 38.916508;
 var mapcentrelng = -77.028610;
+var metrojson = '[{"line":"orange", "stations":' +
+'[' +
+'{"name":"Vienna/Fairfax","lat":38.877872,"lon":-77.271332,"dist":0},' +
+'{"name":"Dunn Loring","lat":38.883099,"lon":-77.228653,"dist":1},' +
+'{"name":"West Falls Church","lat":38.900684,"lon":-77.188866,"dist":1},' +
+'{"name":"East Falls Church","lat":38.885990,"lon":-77.156593,"dist":1},' +
+'{"name":"Ballston","lat":38.882248,"lon":-77.111618,"dist":1},' +
+'{"name":"Virginia Square","lat":38.883015,"lon":-77.103851,"dist":1},' +
+'{"name":"Clarendon","lat":38.886089,"lon":-77.096428,"dist":1},' +
+'{"name":"Courthouse","lat":38.891933,"lon":-77.083557,"dist":1},' +
+'{"name":"Rosslyn","lat":38.895473,"lon":-77.071922,"dist":1},' +
+'{"name":"Foggy Bottom-GWU","lat":38.900684,"lon":-77.050034,"dist":1},' +
+'{"name":"Farragut West","lat":38.901337,"lon":-77.039993,"dist":1},' +
+'{"name":"McPherson Square","lat":38.901356,"lon":-77.033279,"dist":1},' +
+'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},' +
+'{"name":"Federal Triangle","lat":38.893806,"lon":-77.027870,"dist":1},' +
+'{"name":"Smithsonian","lat":38.887775,"lon":-77.028297,"dist":1},' +
+'{"name":"Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},' +
+'{"name":"Federal Center SW","lat":38.884937,"lon":-77.015488,"dist":1},' +
+'{"name":"Capitol South","lat":38.884937,"lon":-77.004738,"dist":1},' +
+'{"name":"Eastern Market","lat":38.884285,"lon":-76.994759,"dist":1},' +
+'{"name":"Potomac Avenue","lat":38.881046,"lon":-76.985146,"dist":1},' +
+'{"name":"Stadium-Armory","lat":38.885921,"lon":-76.977127,"dist":1},' +
+'{"name":"Minnesota Ave","lat":38.898182,"lon":-76.947685,"dist":1},' +
+'{"name":"Deanwood","lat":38.907867,"lon":-76.935455,"dist":1},' +
+'{"name":"Cheverly","lat":38.916550,"lon":-76.915115,"dist":1},' +
+'{"name":"Landover","lat":38.933975,"lon":-76.889961,"dist":1},' +
+'{"name":"New Carrollton","lat":38.948063,"lon":-76.871727,"dist":1}' +
+']},' +
+'{"line":"blue", "stations":' +
+'[' +
+'{"name":"Franconia-Springfield","lat":38.766197,"lon":-77.168465,"dist":0},' +
+'{"name":"Van Dorn","lat":38.799282,"lon":-77.129066,"dist":1},' +
+'{"name":"King St.","lat":38.806438,"lon":-77.060806,"dist":1},' +
+'{"name":"Braddock Road","lat":38.813999,"lon":-77.053474,"dist":1},' +
+'{"name":"National Airport","lat":38.852978,"lon":-77.043510,"dist":1},' +
+'{"name":"Crystal City","lat":38.857788,"lon":-77.050339,"dist":1},' +
+'{"name":"Pentagon City","lat":38.862934,"lon":-77.059135,"dist":1},' +
+'{"name":"Pentagon","lat":38.869419,"lon":-77.053726,"dist":1},' +
+'{"name":"Arlington Cemetery","lat":38.884418,"lon":-77.062866,"dist":1},' +
+'{"name":"Rosslyn","lat":38.895473,"lon":-77.071922,"dist":1},' +
+'{"name":"Foggy Bottom-GWU","lat":38.900684,"lon":-77.050034,"dist":1},' +
+'{"name":"Farragut West","lat":38.901337,"lon":-77.039993,"dist":1},' +
+'{"name":"McPherson Square","lat":38.901356,"lon":-77.033279,"dist":1},' +
+'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},' +
+'{"name":"Federal Triangle","lat":38.893806,"lon":-77.027870,"dist":1},' +
+'{"name":"Smithsonian","lat":38.887775,"lon":-77.028297,"dist":1},' +
+'{"name":"Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},' +
+'{"name":"Federal Center SW","lat":38.884937,"lon":-77.015488,"dist":1},' +
+'{"name":"Capitol South","lat":38.884937,"lon":-77.004738,"dist":1},' +
+'{"name":"Eastern Market","lat":38.884285,"lon":-76.994759,"dist":1},' +
+'{"name":"Potomac Avenue","lat":38.881046,"lon":-76.985146,"dist":1},' +
+'{"name":"Stadium-Armory","lat":38.885921,"lon":-76.977127,"dist":1},' +
+'{"name":"Benning Road","lat":38.890232,"lon":-76.937943,"dist":1},' +
+'{"name":"Capitol Heights","lat":38.889328,"lon":-76.913483,"dist":1},' +
+'{"name":"Addison Road","lat":38.886707,"lon":-76.893227,"dist":1},' +
+'{"name":"Largo Town Center","lat":38.900234,"lon":-76.844513,"dist":1},' +
+'{"name":"Morgan Boulevard","lat":38.893555,"lon":-76.868530,"dist":1}' +
+//'{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1},' +
+']},' +
+'{"line":"yellow", "stations":' +
+'[' +
+'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":0},' +
+'{"name":"Georgia Ave-Petworth","lat":38.936096,"lon":-77.024330,"dist":1},' +
+'{"name":"Columbia Heights","lat":38.928699,"lon":-77.032486,"dist":1},' +
+'{"name":"U Street-Cardozo","lat":38.916508,"lon":-77.028610,"dist":1},' +
+'{"name":"Shaw-Howard University","lat":38.912926,"lon":-77.021866,"dist":1},' +
+'{"name":"Mount Vernon Square - 7th St - Convention Center","lat":38.905621,"lon":-77.021919,"dist":1},' +
+'{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":1},' +
+'{"name":"Archives-Navy Memorial-Penn Quarter","lat":38.894073,"lon":-77.021797,"dist":1},' +
+'{"name":"L&#39;Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},' +
+'{"name":"Pentagon","lat":38.869419,"lon":-77.053726,"dist":1},' +
+'{"name":"Pentagon City","lat":38.862934,"lon":-77.059135,"dist":1},' +
+'{"name":"Crystal City","lat":38.857788,"lon":-77.050339,"dist":1},' +
+'{"name":"National Airport","lat":38.852978,"lon":-77.043510,"dist":1},' +
+'{"name":"Braddock Road","lat":38.813999,"lon":-77.053474,"dist":1},' +
+'{"name":"King St.","lat":38.806438,"lon":-77.060806,"dist":1},' +
+'{"name":"Eisenhower Avenue","lat":38.800285,"lon":-77.070854,"dist":1},' +
+'{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1}' +
+']},' +
+'{"line":"red", "stations":' +
+'[' +
+'{"name":"Glenmont","lat":39.061398,"lon":-77.053108,"dist":0},' +
+'{"name":"Wheaton","lat":39.038620,"lon":-77.050789,"dist":1},' +
+'{"name":"Forest Glen","lat":39.015484,"lon":-77.042702,"dist":1},' +
+'{"name":"Silver Spring","lat":38.989502,"lon":-77.026886,"dist":1},' +
+'{"name":"Takoma","lat":38.975407,"lon":-77.017441,"dist":1},' +
+'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":1},' +
+'{"name":"Brookland-CUA","lat":38.933292,"lon":-76.994484,"dist":1},' +
+'{"name":"Rhode Island Ave","lat":38.920788,"lon":-76.995621,"dist":1},' +
+'{"name":"New York Ave - Gallaudet Univ","lat":38.910004,"lon":-77.001289,"dist":1},' +
+'{"name":"Union Station","lat":38.897423,"lon":-77.007248,"dist":1},' +
+'{"name":"Judiciary Square","lat":38.896118,"lon":-77.016319,"dist":1},' +
+'{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":1},' +
+'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},' +
+'{"name":"Farragut North","lat":38.903435,"lon":-77.039490,"dist":1},' +
+'{"name":"Dupont Circle","lat":38.909626,"lon":-77.043335,"dist":1},' +
+'{"name":"Woodley Park-Zoo-Adams Morgan","lat":38.924980,"lon":-77.052368,"dist":1},' +
+'{"name":"Cleveland Park","lat":38.934734,"lon":-77.057945,"dist":1},' +
+'{"name":"Van Ness-UDC","lat":38.943638,"lon":-77.063194,"dist":1},' +
+'{"name":"Tenleytown-American Univ","lat":38.947895,"lon":-77.079224,"dist":1},' +
+'{"name":"Friendship Heights","lat":38.960011,"lon":-77.085251,"dist":1},' +
+'{"name":"Bethesda","lat":38.984398,"lon":-77.094109,"dist":1},' +
+'{"name":"Medical Center","lat":39.000057,"lon":-77.096901,"dist":1},' +
+'{"name":"Grosvenor-Strathmore","lat":39.029221,"lon":-77.103813,"dist":1},' +
+'{"name":"White Flint","lat":39.048176,"lon":-77.112831,"dist":1},' +
+'{"name":"Twinbrook","lat":39.062389,"lon":-77.120804,"dist":1},' +
+'{"name":"Rockville","lat":39.084438,"lon":-77.145836,"dist":1},' +
+'{"name":"Shady Grove","lat":39.119972,"lon":-77.164795,"dist":1}' +
+']},' +
+'{"line":"green", "stations":' +
+'[' +
+'{"name":"Branch Avenue","lat":38.827023,"lon":-76.911827,"dist":0},' +
+'{"name":"Suitland","lat":38.843819,"lon":-76.931633,"dist":1},' +
+'{"name":"Naylor Road","lat":38.851257,"lon":-76.956306,"dist":1},' +
+'{"name":"Southern Ave","lat":38.841011,"lon":-76.975021,"dist":1},' +
+'{"name":"Congress Heights","lat":38.845356,"lon":-76.987900,"dist":1},' +
+'{"name":"Anacostia","lat":38.861782,"lon":-76.995361,"dist":1},' +
+'{"name":"Navy Yard","lat":38.876484,"lon":-77.004723,"dist":1},' +
+'{"name":"Waterfront-SEU","lat":38.876518,"lon":-77.017204,"dist":1},' +
+'{"name":"Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},' +
+'{"name":"Archives-Navy Memorial-Penn Quarter","lat":38.894073,"lon":-77.021797,"dist":1},' +
+'{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":1},' +
+'{"name":"Mount Vernon Square - 7th St - Convention Center","lat":38.905621,"lon":-77.021919,"dist":1},' +
+'{"name":"Shaw-Howard University","lat":38.912926,"lon":-77.021866,"dist":1},' +
+'{"name":"U Street-Cardozo","lat":38.916508,"lon":-77.028610,"dist":1},' +
+'{"name":"Columbia Heights","lat":38.928699,"lon":-77.032486,"dist":1},' +
+'{"name":"Georgia Ave-Petworth","lat":38.936096,"lon":-77.024330,"dist":1},' +
+'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":1},' +
+'{"name":"West Hyattsville","lat":38.955021,"lon":-76.969528,"dist":1},' +
+'{"name":"Prince George&#39;s Plaza","lat":38.965214,"lon":-76.956009,"dist":1},' +
+'{"name":"College Park-U of Md","lat":38.978378,"lon":-76.927811,"dist":1},' +
+'{"name":"Greenbelt","lat":39.010998,"lon":-76.911270,"dist":1}' +
+']}]';
 
 function station(stationid, name, routes, lat, lon) {
 	this.stationid = stationid;
@@ -74,7 +206,7 @@ function initialize() {
 
 	var mapOptions = {
 		zoom : 11,
-		center : new google.maps.LatLng(mapcentrelat,mapcentrelng)
+		center : new google.maps.LatLng(mapcentrelat, mapcentrelng)
 	};
 
 	google.maps.visualRefresh = true;
@@ -135,12 +267,6 @@ function initialize() {
 
 	});
 
-	var myroute1 = new route("Route 1", stationarr1);
-	var myroute2 = new route("Route 2", stationarr2);
-	var myroute3 = new route("Route 3", stationarr3);
-	myroutes.push(myroute1);
-	myroutes.push(myroute2);
-	myroutes.push(myroute3);
 	drawrfixedroutes(myroutes);
 	//zoom(stationnames);
 	searchBox();
@@ -157,24 +283,24 @@ function initialize() {
 		if (this.value == "choice-1") {
 			$("#startstationsdiv").show();
 			$("#startsearchdiv").hide();
-			if(searchingdest){
+			if (searchingdest) {
 				map.controls[google.maps.ControlPosition.TOP].pop(inputdest);
 				searchingdest = false;
 			}
-			if(searchingstart){
+			if (searchingstart) {
 				map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
 				searchingstart = false;
 			}
 		} else if (this.value == "choice-2") {
 			$("#startstationsdiv").hide();
 			$("#startsearchdiv").show();
-			
+
 			$("#startPage").popup("close");
-			if(searchingdest){
+			if (searchingdest) {
 				searchingdest = false;
 				map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
 			}
-			if(!searchingstart){
+			if (!searchingstart) {
 				map.controls[google.maps.ControlPosition.TOP].push(inputstart);
 				searchingstart = true;
 			}
@@ -182,16 +308,16 @@ function initialize() {
 			$("#startstationsdiv").hide();
 			$("#startsearchdiv").hide();
 			$("#startPage").popup("close");
-			if(searchingdest){
+			if (searchingdest) {
 				searchingdest = false;
 				map.controls[google.maps.ControlPosition.TOP].pop(inputdest);
 			}
-			if(searchingstart){
+			if (searchingstart) {
 				map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
 				searchingstart = false;
 			}
-				getLocation();
-			
+			getLocation();
+
 		}
 	});
 
@@ -200,12 +326,12 @@ function initialize() {
 		if (this.value == "choice-1") {
 			$("#destinationstationsdiv").show();
 			$("#destinationsearchdiv").hide();
-			if(searchingdest){
+			if (searchingdest) {
 				map.controls[google.maps.ControlPosition.TOP].pop(inputdest);
 				searchingdest = false;
 			}
-			if(searchingstart){
-			$("#destinationstationsdiv").hide();
+			if (searchingstart) {
+				$("#destinationstationsdiv").hide();
 				map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
 				searchingstart = false;
 			}
@@ -213,11 +339,11 @@ function initialize() {
 			$("#destinationstationsdiv").hide();
 			$("#destinationsearchdiv").show();
 			$("#destPage").popup("close");
-			if(searchingstart){
+			if (searchingstart) {
 				map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
 				searchingstart = false;
 			}
-			if(!searchingdest){
+			if (!searchingdest) {
 				map.controls[google.maps.ControlPosition.TOP].push(inputdest);
 				searchingdest = true;
 			}
@@ -329,10 +455,10 @@ function setStartStation(stationid) {
 		drawShortestRoute(startstation, endstation);
 	$('input[data-type="search"]').val("");
 	$('input[data-type="search"]').trigger("keyup");
-	
+
 	$(".ui-popup").popup("close");
 	//$("#startstationlabel").text(startstation.name);
-	
+
 }
 
 function setEndStation(stationid) {
@@ -358,21 +484,6 @@ function getStationByID(stationid) {
 
 function populateListViews() {
 
-	$.each(stationarr1, function() {
-		if (!($.inArray(this, stationnames) > -1)) {
-			stationnames.push(this);
-		}
-	});
-	$.each(stationarr2, function() {
-		if (!($.inArray(this, stationnames) > -1)) {
-			stationnames.push(this);
-		}
-	});
-	$.each(stationarr3, function() {
-		if (!($.inArray(this, stationnames) > -1)) {
-			stationnames.push(this);
-		}
-	});
 	var output = '';
 	$.each(stationnames, function() {
 		$('#stations-start').append("<li onclick='setStartStation(" + this.stationid + ")'  class='ui-screen-hidden' ><a>" + this.name + "</a></li>");
@@ -406,8 +517,7 @@ function zoom(fitstations) {
 
 function drawShortestRoute(ss, es) {
 	$("#detailsbutton").show();
-	clearOverlays();
-	mingroupedroute;
+	clearOverlays(); mingroupedroute;
 	$('#route-list').empty();
 	var mintime = -1;
 	var time = 0;
@@ -429,11 +539,11 @@ function drawShortestRoute(ss, es) {
 		});
 	});
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
-		$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
+	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
 	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
 
 	zoom(zoomstations);
-	}
+}
 
 function drawroute(route) {
 
@@ -458,21 +568,21 @@ function drawroute(route) {
 			if (stats == -1)
 				stats = 0;
 			var iconimage = 'images/metro.png';
-			var startdist = getDistanceFromLatLonInKm(startmarker.position.lat(),startmarker.position.lng(), startstation.lat,startstation.lon);
-			var destdist = getDistanceFromLatLonInKm(stopmarker.position.lat(),stopmarker.position.lng(), endstation.lat,endstation.lon);
+			var startdist = getDistanceFromLatLonInKm(startmarker.position.lat(), startmarker.position.lng(), startstation.lat, startstation.lon);
+			var destdist = getDistanceFromLatLonInKm(stopmarker.position.lat(), stopmarker.position.lng(), endstation.lat, endstation.lon);
 			var startdist = Math.round(startdist * 1000);
 			var destdist = Math.round(destdist * 1000);
 			var startdiststr = "";
 			var destdiststr = "";
-			if (startdist > 0.1 && startdist < 1000) 
-				startdiststr = " (" +startdist + "m from Starting Point)"; 
-			else if (startdist >=1000)
-				startdiststr = " (" +Math.round(startdist/100) /10  + "Km from Starting Point)"; 
-			if (destdist > 0.1 && destdist < 1000) 
-				destdiststr = " (" +destdist + "m from Destination)"; 
-			else if (destdist >=1000)
-				destdiststr = " (" +Math.round(destdist/100) /10 + "Km from Destination)"; 
-			
+			if (startdist > 0.1 && startdist < 1000)
+				startdiststr = " (" + startdist + "m from Starting Point)";
+			else if (startdist >= 1000)
+				startdiststr = " (" + Math.round(startdist / 100) / 10 + "Km from Starting Point)";
+			if (destdist > 0.1 && destdist < 1000)
+				destdiststr = " (" + destdist + "m from Destination)";
+			else if (destdist >= 1000)
+				destdiststr = " (" + Math.round(destdist / 100) / 10 + "Km from Destination)";
+
 			if (this == startstation) {
 				iconimage = 'images/metrostart.png';
 				//$('#route-list').append("<li data-theme='b' style='text-align: center;'>Start</li>").listview('refresh');
@@ -480,7 +590,7 @@ function drawroute(route) {
 				$('#route-list').append("<li data-theme='d' style='text-align: center;'>(Pass " + stats + " stations)</li>").listview('refresh');
 			} else if (this == endstation) {
 				iconimage = 'images/metrodest.png';
-				$('#route-list').append("<li data-theme='a' style='text-align: center;'>Stop at: " + this.name +  destdiststr + "</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;'>Stop at: " + this.name + destdiststr + "</li>").listview('refresh');
 				//$('#route-list').append("<li data-theme='b'style='text-align: center;'>Destination</li>").listview('refresh');
 			} else if (curr == 0 && this != endstation && this != startstation) {
 				iconimage = 'images/metro.png';
@@ -527,53 +637,7 @@ function drawroute(route) {
 	});
 }
 
-function getCommonRoutesColour(stats) {
-	var route1count = 0;
-	var route2count = 0;
-	var route3count = 0;
-	$.each(stats, function() {
-		$.each(this.routes, function() {
 
-			if (this.name == "Route 1") {
-				route1count++;
-			} else if (this.name == "Route 2") {
-				route2count++;
-			} else if (this.name == "Route 3") {
-				route3count++;
-			}
-		});
-	});
-	//????
-	//get max col
-
-}
-
-function drawrfixedroutes(routes) {
-
-	$.each(routes, function() {
-		var colour = "";
-		if (this.name == "Route 1") {
-			colour = "#0000FF";
-		} else if (this.name == "Route 2") {
-			colour = "#FF0000";
-		} else if (this.name == "Route 3") {
-			colour = "#00FF00";
-		}
-		var polyOptions = {
-			strokeColor : colour,
-			strokeOpacity : 0.5,
-			strokeWeight : 12
-		};
-		var poly = new google.maps.Polyline(polyOptions);
-		poly.setMap(map);
-		var path = poly.getPath();
-
-		$.each(this.stations, function() {
-			path.push(new google.maps.LatLng(this.lat, this.lon));
-
-		});
-	});
-}
 
 function onItemClick(event, pin) {
 	// Create content
@@ -588,21 +652,7 @@ function closeststation(latlong) {
 	var closest = -1;
 
 	var clstation;
-	$.each(stationarr1, function() {
-		var distance = getDistanceFromLatLonInKm(latlong.lat(), latlong.lng(), this.lat, this.lon);
-		if (closest == -1 || distance < closest) {
-			clstation = this;
-			closest = distance;
-		}
-	});
-	$.each(stationarr2, function() {
-		var distance = getDistanceFromLatLonInKm(latlong.lat(), latlong.lng(), this.lat, this.lon);
-		if (closest == -1 || distance < closest) {
-			clstation = this;
-			closest = distance;
-		}
-	});
-	$.each(stationarr3, function() {
+	$.each(stationnames, function() {
 		var distance = getDistanceFromLatLonInKm(latlong.lat(), latlong.lng(), this.lat, this.lon);
 		if (closest == -1 || distance < closest) {
 			clstation = this;
@@ -736,15 +786,6 @@ function getRouteByName(name) {
 	return resroute;
 }
 
-function getCommonRoute(firststation, laststation) {
-	var resroute;
-	$.each(myroutes, function() {
-		if (($.inArray(this.name, firststation.routes) > -1) && ($.inArray(this.name, laststation.routes) > -1)) {
-			resroute = this;
-		}
-	});
-	return resroute;
-}
 
 //returns change stations on same rout as from station
 function getChangeStations(fromstation) {
@@ -762,13 +803,6 @@ function getChangeStations(fromstation) {
 		}
 	});
 	return changestations;
-}
-
-function getShortestRoute(routes) {
-	var minroute;
-	$.each(routes, function() {
-
-	});
 }
 
 function getStationsBetweenRoute(fromstation, tostation, route) {
@@ -828,266 +862,57 @@ function onError(error) {
 
 
 $(document).ready(function() {
+	var json = $.parseJSON(metrojson);
 
-var metrojson = '[{"line":"orange", "stations":'+
-'[{"name":"Rosslyn","lat":38.895473,"lon":-77.071922,"dist":0},'+
-'{"name":"Courthouse","lat":38.891933,"lon":-77.083557,"dist":1},'+
-'{"name":"Clarendon","lat":38.886089,"lon":-77.096428,"dist":1},'+
-'{"name":"Virginia Square","lat":38.883015,"lon":-77.103851,"dist":1},'+
-'{"name":"Ballston","lat":38.882248,"lon":-77.111618,"dist":1},'+
-'{"name":"East Falls Church","lat":38.885990,"lon":-77.156593,"dist":1},'+
-'{"name":"West Falls Church","lat":38.900684,"lon":-77.188866,"dist":1},'+
-'{"name":"Dunn Loring","lat":38.883099,"lon":-77.228653,"dist":1},'+
-'{"name":"Vienna/Fairfax","lat":38.877872,"lon":-77.271332,"dist":1},'+
-'{"name":"Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},'+
-'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},'+
-'{"name":"Foggy Bottom-GWU","lat":38.900684,"lon":-77.050034,"dist":1},'+
-'{"name":"Farragut West","lat":38.901337,"lon":-77.039993,"dist":1},'+
-'{"name":"McPherson Square","lat":38.901356,"lon":-77.033279,"dist":1},'+
-'{"name":"Federal Triangle","lat":38.893806,"lon":-77.027870,"dist":1},'+
-'{"name":"Smithsonian","lat":38.887775,"lon":-77.028297,"dist":1},'+
-'{"name":"Federal Center SW","lat":38.884937,"lon":-77.015488,"dist":1},'+
-'{"name":"Capitol South","lat":38.884937,"lon":-77.004738,"dist":1},'+
-'{"name":"Eastern Market","lat":38.884285,"lon":-76.994759,"dist":1},'+
-'{"name":"Potomac Avenue","lat":38.881046,"lon":-76.985146,"dist":1},'+
-'{"name":"Stadium-Armory","lat":38.885921,"lon":-76.977127,"dist":1},'+
-'{"name":"Minnesota Ave","lat":38.898182,"lon":-76.947685,"dist":1},'+
-'{"name":"Deanwood","lat":38.907867,"lon":-76.935455,"dist":1},'+
-'{"name":"Cheverly","lat":38.916550,"lon":-76.915115,"dist":1},'+
-'{"name":"Landover","lat":38.933975,"lon":-76.889961,"dist":1},'+
-'{"name":"New Carrollton","lat":38.948063,"lon":-76.871727,"dist":1}]},'+
-'{"line":"blue", "stations":'+
-'[{"name":"Rosslyn","lat":38.895473,"lon":-77.071922,"dist":0},'+
-'{"name":"Arlington Cemetery","lat":38.884418,"lon":-77.062866,"dist":1},'+
-'{"name":"Pentagon","lat":38.869419,"lon":-77.053726,"dist":1},'+
-'{"name":"Pentagon City","lat":38.862934,"lon":-77.059135,"dist":1},'+
-'{"name":"Crystal City","lat":38.857788,"lon":-77.050339,"dist":1},'+
-'{"name":"National Airport","lat":38.852978,"lon":-77.043510,"dist":1},'+
-'{"name":"Braddock Road","lat":38.813999,"lon":-77.053474,"dist":1},'+
-'{"name":"King St.","lat":38.806438,"lon":-77.060806,"dist":1},'+
-'{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1},'+
-'{"name":"Franconia-Springfield","lat":38.766197,"lon":-77.168465,"dist":1},'+
-'{"name":"Van Dorn","lat":38.799282,"lon":-77.129066,"dist":1},'+
-'{"name":"L&#39;Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},'+
-'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},'+
-'{"name":"Foggy Bottom-GWU","lat":38.900684,"lon":-77.050034,"dist":1},'+
-'{"name":"Farragut West","lat":38.901337,"lon":-77.039993,"dist":1},'+
-'{"name":"McPherson Square","lat":38.901356,"lon":-77.033279,"dist":1},'+
-'{"name":"Federal Triangle","lat":38.893806,"lon":-77.027870,"dist":1},'+
-'{"name":"Smithsonian","lat":38.887775,"lon":-77.028297,"dist":1},'+
-'{"name":"Federal Center SW","lat":38.884937,"lon":-77.015488,"dist":1},'+
-'{"name":"Capitol South","lat":38.884937,"lon":-77.004738,"dist":1},'+
-'{"name":"Eastern Market","lat":38.884285,"lon":-76.994759,"dist":1},'+
-'{"name":"Potomac Avenue","lat":38.881046,"lon":-76.985146,"dist":1},'+
-'{"name":"Stadium-Armory","lat":38.885921,"lon":-76.977127,"dist":1},'+
-'{"name":"Benning Road","lat":38.890232,"lon":-76.937943,"dist":1},'+
-'{"name":"Capitol Heights","lat":38.889328,"lon":-76.913483,"dist":1},'+
-'{"name":"Addison Road","lat":38.886707,"lon":-76.893227,"dist":1},'+
-'{"name":"Largo Town Center","lat":38.900234,"lon":-76.844513,"dist":1},'+
-'{"name":"Morgan Boulevard","lat":38.893555,"lon":-76.868530,"dist":1}]},'+
-'{"line":"yellow", "stations":'+
-'[{"name":"Pentagon","lat":38.869419,"lon":-77.053726,"dist":0},'+
-'{"name":"Pentagon City","lat":38.862934,"lon":-77.059135,"dist":1},'+
-'{"name":"Crystal City","lat":38.857788,"lon":-77.050339,"dist":1},'+
-'{"name":"National Airport","lat":38.852978,"lon":-77.043510,"dist":1},'+
-'{"name":"Braddock Road","lat":38.813999,"lon":-77.053474,"dist":1},'+
-'{"name":"King St.","lat":38.806438,"lon":-77.060806,"dist":1},'+
-'{"name":"Eisenhower Avenue","lat":38.800285,"lon":-77.070854,"dist":1},'+
-'{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1},'+
-'{"name":"L&#39;Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":1},'+
-'{"name":"Archives-Navy Memorial-Penn Quarter","lat":38.894073,"lon":-77.021797,"dist":1},'+
-'{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":1},'+
-'{"name":"Mount Vernon Square - 7th St - Convention Center","lat":38.905621,"lon":-77.021919,"dist":1},'+
-'{"name":"Shaw-Howard University","lat":38.912926,"lon":-77.021866,"dist":1},'+
-'{"name":"U Street-Cardozo","lat":38.916508,"lon":-77.028610,"dist":1},'+
-'{"name":"Columbia Heights","lat":38.928699,"lon":-77.032486,"dist":1},'+
-'{"name":"Georgia Ave-Petworth","lat":38.936096,"lon":-77.024330,"dist":1},'+
-'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":1}]},'+
-'{"line":"red", "stations":'+
-'[{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":0},'+
-'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":1},'+
-'{"name":"Glenmont","lat":39.061398,"lon":-77.053108,"dist":1},'+
-'{"name":"Wheaton","lat":39.038620,"lon":-77.050789,"dist":1},'+
-'{"name":"Forest Glen","lat":39.015484,"lon":-77.042702,"dist":1},'+
-'{"name":"Silver Spring","lat":38.989502,"lon":-77.026886,"dist":1},'+
-'{"name":"Takoma","lat":38.975407,"lon":-77.017441,"dist":1},'+
-'{"name":"Brookland-CUA","lat":38.933292,"lon":-76.994484,"dist":1},'+
-'{"name":"Rhode Island Ave","lat":38.920788,"lon":-76.995621,"dist":1},'+
-'{"name":"New York Ave - Gallaudet Univ","lat":38.910004,"lon":-77.001289,"dist":1},'+
-'{"name":"Union Station","lat":38.897423,"lon":-77.007248,"dist":1},'+
-'{"name":"Judiciary Square","lat":38.896118,"lon":-77.016319,"dist":1},'+
-'{"name":"Metro Center","lat":38.898315,"lon":-77.027786,"dist":1},'+
-'{"name":"Farragut North","lat":38.903435,"lon":-77.039490,"dist":1},'+
-'{"name":"Dupont Circle","lat":38.909626,"lon":-77.043335,"dist":1},'+
-'{"name":"Woodley Park-Zoo-Adams Morgan","lat":38.924980,"lon":-77.052368,"dist":1},'+
-'{"name":"Cleveland Park","lat":38.934734,"lon":-77.057945,"dist":1},'+
-'{"name":"Van Ness-UDC","lat":38.943638,"lon":-77.063194,"dist":1},'+
-'{"name":"Tenleytown-American Univ","lat":38.947895,"lon":-77.079224,"dist":1},'+
-'{"name":"Friendship Heights","lat":38.960011,"lon":-77.085251,"dist":1},'+
-'{"name":"Bethesda","lat":38.984398,"lon":-77.094109,"dist":1},'+
-'{"name":"Medical Center","lat":39.000057,"lon":-77.096901,"dist":1},'+
-'{"name":"Grosvenor-Strathmore","lat":39.029221,"lon":-77.103813,"dist":1},'+
-'{"name":"White Flint","lat":39.048176,"lon":-77.112831,"dist":1},'+
-'{"name":"Twinbrook","lat":39.062389,"lon":-77.120804,"dist":1},'+
-'{"name":"Rockville","lat":39.084438,"lon":-77.145836,"dist":1},'+
-'{"name":"Shady Grove","lat":39.119972,"lon":-77.164795,"dist":1}]},'+
-'{"line":"green", "stations":'+
-'[{"name":"Enfant Plaza","lat":38.884888,"lon":-77.021591,"dist":0},'+
-'{"name":"Archives-Navy Memorial-Penn Quarter","lat":38.894073,"lon":-77.021797,"dist":1},'+
-'{"name":"Gallery Place-Chinatown","lat":38.897495,"lon":-77.021652,"dist":1},'+
-'{"name":"Mount Vernon Square - 7th St - Convention Center","lat":38.905621,"lon":-77.021919,"dist":1},'+
-'{"name":"Shaw-Howard University","lat":38.912926,"lon":-77.021866,"dist":1},'+
-'{"name":"U Street-Cardozo","lat":38.916508,"lon":-77.028610,"dist":1},'+
-'{"name":"Columbia Heights","lat":38.928699,"lon":-77.032486,"dist":1},'+
-'{"name":"Georgia Ave-Petworth","lat":38.936096,"lon":-77.024330,"dist":1},'+
-'{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":1},'+
-'{"name":"West Hyattsville","lat":38.955021,"lon":-76.969528,"dist":1},'+
-'{"name":"Prince George&#39;s Plaza","lat":38.965214,"lon":-76.956009,"dist":1},'+
-'{"name":"College Park-U of Md","lat":38.978378,"lon":-76.927811,"dist":1},'+
-'{"name":"Greenbelt","lat":39.010998,"lon":-76.911270,"dist":1},'+
-'{"name":"Waterfront-SEU","lat":38.876518,"lon":-77.017204,"dist":1},'+
-'{"name":"Navy Yard","lat":38.876484,"lon":-77.004723,"dist":1},'+
-'{"name":"Anacostia","lat":38.861782,"lon":-76.995361,"dist":1},'+
-'{"name":"Congress Heights","lat":38.845356,"lon":-76.987900,"dist":1},'+
-'{"name":"Southern Ave","lat":38.841011,"lon":-76.975021,"dist":1},'+
-'{"name":"Naylor Road","lat":38.851257,"lon":-76.956306,"dist":1},'+
-'{"name":"Suitland","lat":38.843819,"lon":-76.931633,"dist":1},'+
-'{"name":"Branch Avenue","lat":38.827023,"lon":-76.911827,"dist":1}]}]'
-;
- 
-line
-stations
-	name
-	lat
-	lon
-	dist
-var json = $.parseJSON(metrojson);
-//populate roomsArray with json data
-$.each(json, function(index, value) {
-	var line = value.line;
-	$.each(value.stations, function() {
-		var station = new station(line+this.name, this.name, new Array(line), this.lat,this.lon);
-		allDevicesArray.push(myDevice);
-		devices.push(myDevice);
-			var station27 = new station("27", "Omonia Station", new Array("Route 2", "Route 3"), 37.984016, 23.727983);
-
+	$.each(json, function(index, value) {
+		var stationarr = [];
+		var line = value.line;
+		$.each(value.stations, function() {
+			var stat = new station(line + this.name, this.name, new Array(line), this.lat, this.lon);
+			stationarr.push(stat);
+			stationnames.push(stat);
+			if (stationarr.length > 1) {
+				linkdurations.push(new link(stationarr[stationarr.length - 2], stationarr[stationarr.length - 1], this.dist));
+			}
+		});
+		stationarrs.push(stationarr);
+		var newroute = new route(line, stationarr);
+		myroutes.push(newroute);
 	});
-
-	var myRoom = new room(value.id, value.name, value.shape, value.x, value.y, devices);
-	roomsArray.push(myRoom);
-	
-});
-
-
-//	var station22 = new station("22", "Aghios Antonios Station", new Array("Route 2"), 38.006542, 23.699280);
-//	var station23 = new station("23", "Sepolia Station", new Array("Route 2"), 38.002621, 23.713688);
-//	var station24 = new station("24", "Attiki Station", new Array("Route 2", "Route 3"), 37.998116, 23.722763);
-//	var station25 = new station("25", "Larissa Station", new Array("Route 2"), 37.990192, 23.719177);
-//	var station26 = new station("26", "Metaxourghio Station", new Array("Route 2"), 37.986584, 23.720821);
-	var station27 = new station("27", "Omonia Station", new Array("Route 2", "Route 3"), 37.984016, 23.727983);
-	var station28 = new station("28", "Panepistimio Station", new Array("Route 2"), 37.980167, 23.732908);
-	var station29 = new station("29", "Akropoli Station", new Array("Route 2"), 37.968681, 23.729433);
-	var station30 = new station("30", "Syngrou Fix Station", new Array("Route 2"), 37.964081, 23.726145);
-	var station31 = new station("31", "Neos Kosmos Station", new Array("Route 2"), 37.957615, 23.728544);
-	var station32 = new station("32", "Aghios Ioannis Station", new Array("Route 2"), 37.956306, 23.734411);
-	var station33 = new station("33", "Dafni Station", new Array("Route 2"), 37.949314, 23.737202);
-	var station34 = new station("34", "Aghios Dimitrios Station", new Array("Route 2"), 37.941151, 23.740540);
-
-	var station36 = new station("36", "Kifissia Station", new Array("Route 3"), 38.074287, 23.808201);
-	var station37 = new station("37", "KAT Station", new Array("Route 3"), 38.065437, 23.803967);
-	var station38 = new station("38", "Maroussi Station", new Array("Route 3"), 38.056305, 23.805155);
-	var station39 = new station("39", "Neradjiotissa Station", new Array("Route 3"), 38.045479, 23.793570);
-	var station40 = new station("40", "Irini Station", new Array("Route 3"), 38.043098, 23.783792);
-	var station41 = new station("41", "Iraklio Station", new Array("Route 3"), 38.046200, 23.766171);
-	var station42 = new station("42", "Nea Ionia Station", new Array("Route 3"), 38.041401, 23.754854);
-	var station43 = new station("43", "Pefkakia Station", new Array("Route 3"), 38.037128, 23.750179);
-	var station44 = new station("44", "Perissos Station", new Array("Route 3"), 38.032810, 23.744658);
-	var station45 = new station("45", "Ano Patissia Station", new Array("Route 3"), 38.023853, 23.735954);
-	var station46 = new station("46", "Aghios Eleftherios Station", new Array("Route 3"), 38.020119, 23.731791);
-	var station47 = new station("47", "Kato Patissia Station", new Array("Route 3"), 38.011600, 23.728579);
-	var station48 = new station("48", "Aghios Nikolaos Station", new Array("Route 3"), 38.006794, 23.727640);
-	var station49 = new station("49", "Victoria Station", new Array("Route 3"), 37.993088, 23.730200);
-	var station50 = new station("50", "Thissio Station", new Array("Route 3"), 37.976746, 23.720728);
-	var station51 = new station("51", "Petralona Station", new Array("Route 3"), 37.968281, 23.709007);
-	var station52 = new station("52", "Tavros Station", new Array("Route 3"), 37.962582, 23.703470);
-	var station53 = new station("53", "Kalithea Station", new Array("Route 3"), 37.960503, 23.697279);
-	var station54 = new station("54", "Moschato Station", new Array("Route 3"), 37.955132, 23.680010);
-	var station55 = new station("55", "Faliro Station", new Array("Route 3"), 37.944984, 23.664776);
-	var station56 = new station("56", "Piraeus Station", new Array("Route 3"), 37.948063, 23.642447);
-	stationarr1.push(station1);
-	stationarr1.push(station2);
-	stationarr1.push(station3);
-	stationarr1.push(station4);
-	stationarr1.push(station5);
-	stationarr1.push(station6);
-	stationarr1.push(station7);
-	stationarr1.push(station8);
-	stationarr1.push(station9);
-	stationarr1.push(station10);
-	stationarr1.push(station11);
-	stationarr1.push(station12);
-	stationarr1.push(station13);
-	stationarr1.push(station14);
-	stationarr1.push(station15);
-	stationarr1.push(station16);
-	stationarr1.push(station17);
-	stationarr1.push(station18);
-	stationarr1.push(station19);
-	stationarr1.push(station20);
-
-	for (var i = 0; i < (stationarr1.length - 1); i++) {
-		linkdurations.push(new link(stationarr1[i], stationarr1[i + 1], 1));
-	}
-	stationarr2.push(station22);
-	stationarr2.push(station23);
-	stationarr2.push(station24);
-	stationarr2.push(station25);
-	stationarr2.push(station26);
-	stationarr2.push(station27);
-	stationarr2.push(station28);
-	stationarr2.push(station16);
-	stationarr2.push(station29);
-	stationarr2.push(station30);
-	stationarr2.push(station31);
-	stationarr2.push(station32);
-	stationarr2.push(station33);
-	stationarr2.push(station34);
-
-	for (var i = 0; i < (stationarr2.length - 1); i++) {
-		linkdurations.push(new link(stationarr2[i], stationarr2[i + 1], 1));
-	}
-
-	stationarr3.push(station36);
-	stationarr3.push(station37);
-	stationarr3.push(station38);
-	stationarr3.push(station39);
-	stationarr3.push(station40);
-	stationarr3.push(station41);
-	stationarr3.push(station42);
-	stationarr3.push(station43);
-	stationarr3.push(station44);
-	stationarr3.push(station45);
-	stationarr3.push(station46);
-	stationarr3.push(station47);
-	stationarr3.push(station48);
-	stationarr3.push(station24);
-	stationarr3.push(station49);
-	stationarr3.push(station27);
-	stationarr3.push(station17);
-	stationarr3.push(station50);
-	stationarr3.push(station51);
-	stationarr3.push(station52);
-	stationarr3.push(station53);
-	stationarr3.push(station54);
-	stationarr3.push(station55);
-	stationarr3.push(station56);
-
-	for (var i = 0; i < (stationarr3.length - 1); i++) {
-		linkdurations.push(new link(stationarr3[i], stationarr3[i + 1], 1));
-	}
-
 	populateListViews();
 });
+
+
+function drawrfixedroutes(routes) {
+
+	$.each(routes, function() {
+		var colour = "";
+		if (this.name == "red") {
+			colour = "#FF0000";
+		} else if (this.name == "green") {
+			colour = "#00FF00";
+		} else if (this.name == "blue") {
+			colour = "#0000FF";
+		} else if (this.name == "orange") {
+			colour = "#FF4500";
+		} else if (this.name == "yellow") {
+			colour = "#FFFF00";
+		}
+		var polyOptions = {
+			strokeColor : colour,
+			strokeOpacity : 0.5,
+			strokeWeight : 12
+		};
+		var poly = new google.maps.Polyline(polyOptions);
+		poly.setMap(map);
+		var path = poly.getPath();
+
+		$.each(this.stations, function() {
+			path.push(new google.maps.LatLng(this.lat, this.lon));
+
+		});
+	});
+}
 
 function loadScript() {
 	if (window.navigator.onLine) {
@@ -1100,4 +925,4 @@ function loadScript() {
 		alert("offline");
 }
 
-window.onload = loadScript; 
+window.onload = loadScript;
