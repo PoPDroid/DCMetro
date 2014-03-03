@@ -12,7 +12,7 @@ var startstation;
 var touchoption = "none";
 var endstation;
 var maxstops = 2;
-var stationnames = [];
+var allstations = [];
 var mingroupedroute;
 var mylocation = false;
 var searchingdest = false;
@@ -21,6 +21,7 @@ var inputstart;
 var inputdest;
 var mapcentrelat = 38.916508;
 var mapcentrelng = -77.028610;
+
 var metrojson = '[{"line":"orange", "stations":' +
 '[' +
 '{"name":"Vienna/Fairfax","lat":38.877872,"lon":-77.271332,"dist":0},' +
@@ -222,9 +223,9 @@ function initialize() {
 	var imagestart = 'images/start.png';
 	var imagestop = 'images/stop.png';
 
-	startstation = stationnames[0];
+	startstation = allstations[0];
 
-	endstation = stationnames[stationnames.length - 1];
+	endstation = allstations[allstations.length - 1];
 	startmarker = new google.maps.Marker({
 		map : map,
 		draggable : true,
@@ -268,7 +269,7 @@ function initialize() {
 	});
 
 	drawrfixedroutes(myroutes);
-	//zoom(stationnames);
+	//zoom(allstations);
 	searchBox();
 	$("#select-choice-start").val("search-start");
 	google.maps.event.trigger(map, 'resize');
@@ -475,7 +476,7 @@ function setEndStation(stationid) {
 
 function getStationByID(stationid) {
 	var outstation;
-	$.each(stationnames, function() {
+	$.each(allstations, function() {
 		if (stationid == this.stationid)
 			outstation = this;
 	});
@@ -485,7 +486,7 @@ function getStationByID(stationid) {
 function populateListViews() {
 
 	var output = '';
-	$.each(stationnames, function() {
+	$.each(allstations, function() {
 		$('#stations-start').append("<li onclick='setStartStation(" + this.stationid + ")'  class='ui-screen-hidden' ><a>" + this.name + "</a></li>");
 		$('#stations-dest').append("<li onclick='setEndStation(" + this.stationid + ")' class='ui-screen-hidden' ><a>" + this.name + "</a></li>");
 	});
@@ -652,7 +653,7 @@ function closeststation(latlong) {
 	var closest = -1;
 
 	var clstation;
-	$.each(stationnames, function() {
+	$.each(allstations, function() {
 		var distance = getDistanceFromLatLonInKm(latlong.lat(), latlong.lng(), this.lat, this.lon);
 		if (closest == -1 || distance < closest) {
 			clstation = this;
@@ -857,7 +858,7 @@ function showPosition(position) {
 }
 
 function onError(error) {
-	alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+	//alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
 }
 
 
@@ -870,7 +871,7 @@ $(document).ready(function() {
 		$.each(value.stations, function() {
 			var stat = new station(line + this.name, this.name, new Array(line), this.lat, this.lon);
 			stationarr.push(stat);
-			stationnames.push(stat);
+			allstations.push(stat);
 			if (stationarr.length > 1) {
 				linkdurations.push(new link(stationarr[stationarr.length - 2], stationarr[stationarr.length - 1], this.dist));
 			}
