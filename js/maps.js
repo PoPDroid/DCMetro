@@ -503,6 +503,38 @@ function zoom(fitstations) {
 }
 
 function drawShortestRoute(ss, es) {
+	
+	
+	$("#detailsbutton").show();
+	clearOverlays(); mingroupedroute;
+	$('#route-list').empty();
+	
+	
+	
+	mingroupedroute = getMinGroupedRoute(ss,es);
+	
+	
+	
+	
+	var zoomstations = [];
+	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
+	$.each(mingroupedroute.routes, function() {
+		drawroute(this);
+		$.each(this.stations, function() {
+			zoomstations.push(this);
+		});
+	});
+	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
+	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
+	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
+
+	zoom(zoomstations);
+	
+	
+	
+	
+	
+/*
 	$("#detailsbutton").show();
 	clearOverlays(); mingroupedroute;
 	$('#route-list').empty();
@@ -529,8 +561,107 @@ function drawShortestRoute(ss, es) {
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
 	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
 
-	zoom(zoomstations);
+	zoom(zoomstations);*/
+
 }
+
+
+function getMinGroupedRoute(ss,es){
+	var reached =false;
+	var resgroupedroute;
+	var prevgroupedroutes = [];
+	var currstart;
+	var currstop;
+	$.each(getStationsByName(ss.name), function() {
+		var start = this;
+		$.each(getStationsByName(es.name), function() {
+			var end = this;
+			if (hasDirectRoute(start, end)) {//there is a direct route
+				reached = true;
+				var rt = getDirectRoute(start, end);
+				resgroupedroute = new groupedroute(new Array(rt), start, end);
+			} else {
+				$.each(getChangeStations(start), function() {
+					var change = this;
+					$.each(getStationsByName(change.name),function(){
+						var rt = getDirectRoute(start, this);
+						var tmpgroupedroute = new groupedroute(new Array(rt), start, end);
+						prevgroupedroutes.push(tmpgroupedroute);
+					});
+				});
+			}
+		});
+s
+	});
+
+	while(!reached){
+		parse options??
+	}
+	
+	return resgroupedroute;
+	}
+
+	//returns change stations on same rout as from station
+function getChangeStations(fromstation) {
+	var changestations = [];
+	var currroute;
+			$.each(getRouteByName(fromstation.line).stations, function() {
+				if (this.change) {
+					changestations.push(this);
+					//alert(this.name);
+				}
+			});
+	return changestations;
+}
+
+function getStationsByName(name){
+	var res = [];
+	$.each(allstations,function(){
+		if(this.name==name)
+			res.push(this);
+	});
+	return res;
+}
+
+function hasDirectRoute(fromstation, tostation) {
+	return(fromstation.line==tostation.line);
+}
+
+function getStationsBetweenRoute(fromstation, tostation, route) {
+	var resstations = [];
+	var hit = false;
+	for (var i = $.inArray(fromstation, route.stations); i <= route.stations.length; i++) {
+		resstations.push(route.stations[i]);
+		if (route.stations[i] == tostation) {
+			hit = true;
+			break;
+		}
+	}
+	if (!hit) {
+		resstations = [];
+		for (var i = $.inArray(fromstation, route.stations); i >= 0; i--) {
+			resstations.push(route.stations[i]);
+			if (route.stations[i] == tostation) {
+				hit = true;
+				break;
+			}
+		}
+	}
+	return resstations;
+}
+
+
+//to do getStationsByName, getDirectRoute
+function getDirectRoute(fromstation, tostation) {
+	
+	var directroute;
+	if(hasDirectRoute(fromstation, tostation) ){
+		directroute = new route("Direct Route", getStationsBetweenRoute(fromstation, tostation, getRouteByName(fromstation.line)));
+	}
+	
+	return directroute;
+}
+
 
 function drawroute(route) {
 
@@ -662,24 +793,9 @@ function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
 }
 
 function deg2rad(deg) {
-	return deg * (Math.PI / 180)
+	return deg * (Math.PI / 180);
 }
 
-//returns array of array of stations on path from start to stop stations
-function getDirectRoutes(fromstation, tostation) {
-	
-	var possiblestartstats = [];
-	if (fromstation.change)
-	{
-		get all stations that are on diff routes???
-	}
-	var directroutes = [];
-		if (($.inArray(fromstation.line, tostation.line) > -1)) {
-			var directroute = new route("Direct Route", getStationsBetweenRoute(fromstation, tostation, getRouteByName(this)));
-			directroutes.push(directroute);
-		}
-	return directroutes;
-}
 
 //returns array of groupedroutes
 function getRoutesWithStops(fromstation, tostation, maxstops) {
@@ -758,10 +874,6 @@ function getLinkDuration(fromstation, tostation) {
 	return duration;
 }
 
-function hasDirectRoute(fromstation, tostation) {
-	return (getDirectRoutes(fromstation, tostation).length > 0);
-}
-
 function getRouteByName(name) {
 	var resroute;
 	$.each(myroutes, function() {
@@ -773,46 +885,8 @@ function getRouteByName(name) {
 }
 
 
-//returns change stations on same rout as from station
-function getChangeStations(fromstation) {
-	var changestations = [];
-	var currroute;
-	$.each(myroutes, function() {
-		if ($.inArray(this.name, fromstation.routes) > -1) {
-			currroute = this;
-			$.each(currroute.stations, function() {
-				if (this.routes.length > 1) {
-					changestations.push(this);
-					//alert(this.name);
-				}
-			});
-		}
-	});
-	return changestations;
-}
 
-function getStationsBetweenRoute(fromstation, tostation, route) {
-	var resstations = [];
-	var hit = false;
-	for (var i = $.inArray(fromstation, route.stations); i <= route.stations.length; i++) {
-		resstations.push(route.stations[i]);
-		if (route.stations[i] == tostation) {
-			hit = true;
-			break;
-		}
-	}
-	if (!hit) {
-		resstations = [];
-		for (var i = $.inArray(fromstation, route.stations); i >= 0; i--) {
-			resstations.push(route.stations[i]);
-			if (route.stations[i] == tostation) {
-				hit = true;
-				break;
-			}
-		}
-	}
-	return resstations;
-}
+
 
 $(function() {
 	$("#mylocation").click(function() {
