@@ -585,17 +585,47 @@ function getMinGroupedRoute(ss,es){
 					var change = this;
 					$.each(getStationsByName(change.name),function(){
 						var rt = getDirectRoute(start, this);
-						var tmpgroupedroute = new groupedroute(new Array(rt), start, end);
+						var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
 						prevgroupedroutes.push(tmpgroupedroute);
 					});
 				});
 			}
 		});
-s
-	});
 
+	});
 	while(!reached){
-		parse options??
+		var newprevgroupedroutes = [];
+		var oldprevgroupedroutes = [];
+		$.each(prevgroupedroutes,function(){
+			var currprevgroupedroute = this;
+			oldprevgroupedroutes.push(currprevgroupedroute);
+				$.each(getStationsByName(currprevgroupedroute.laststation),function(){
+					var start = this;
+					$.each(getChangeStations(start),function(){
+						var change = this;
+						$.each(getStationsByName(change.name),function(){
+
+							var rt = currprevgroupedroute.routes.push(getDirectRoute(start, this));
+							var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
+							newprevgroupedroutes.push(tmpgroupedroute);
+							if (this==es) {
+								reached = true;
+								resgroupedroute = tmpgroupedroute;
+							}
+							
+						});	
+					});
+
+				});
+		});
+		
+		$.each(oldprevgroupedroutes,function(){
+			prevgroupedroutes.pop(this);
+		});		
+		$.each(newprevgroupedroutes,function(){
+			prevgroupedroutes.push(this);
+		});
+		
 	}
 	
 	return resgroupedroute;
