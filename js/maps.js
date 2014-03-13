@@ -607,24 +607,29 @@ function getMinGroupedRoute(ss,es){
 					
 						$.each(getStationsByName(es.name),function(){							
 							if(hasDirectRoute(start, this)){
-									currprevgroupedroute.routes.push(getDirectRoute(start, this));
-									var rt =  currprevgroupedroute.routes;
+								var gr = currprevgroupedroute;
+									gr.routes.push(getDirectRoute(start, this));
+									var rt =  gr.routes;
 									var tmpgroupedroute = new groupedroute(rt, ss, this);
 									reached = true;
 									resgroupedroutes.push(tmpgroupedroute);
 								};
 						});
+						if(!reached)
+						{
 							$.each(getChangeStations(start),function(){
 								var change = this;
 								$.each(getStationsByName(change.name),function(){
 									if(hasDirectRoute(start, this)){
-										currprevgroupedroute.routes.push(getDirectRoute(start, this));
-										var rt =  currprevgroupedroute.routes;
+								var gr = currprevgroupedroute;
+									gr.routes.push(getDirectRoute(start, this));
+										var rt =  gr.routes;
 										var tmpgroupedroute = new groupedroute(rt, ss, this);
 										newprevgroupedroutes.push(tmpgroupedroute);
 									};
 								});	
 							});
+						}
 				});
 		});
 		
