@@ -569,6 +569,7 @@ function drawShortestRoute(ss, es) {
 function getMinGroupedRoute(ss,es){
 	var reached =false;
 	var resgroupedroute;
+	var resgroupedroutes = [];
 	var prevgroupedroutes = [];
 	var currstart;
 	var currstop;
@@ -584,9 +585,11 @@ function getMinGroupedRoute(ss,es){
 				$.each(getChangeStations(start), function() {
 					var change = this;
 					$.each(getStationsByName(change.name),function(){
-						var rt = getDirectRoute(start, this);
-						var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
-						prevgroupedroutes.push(tmpgroupedroute);
+						if(hasDirectRoute(start, this)){
+							var rt = getDirectRoute(start, this);
+							var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
+							prevgroupedroutes.push(tmpgroupedroute);
+						}
 					});
 				});
 			}
@@ -594,28 +597,34 @@ function getMinGroupedRoute(ss,es){
 
 	});
 	while(!reached){
-		var newprevgroupedroutes = [];
 		var oldprevgroupedroutes = [];
+		var newprevgroupedroutes = [];
 		$.each(prevgroupedroutes,function(){
 			var currprevgroupedroute = this;
 			oldprevgroupedroutes.push(currprevgroupedroute);
-				$.each(getStationsByName(currprevgroupedroute.laststation),function(){
+				$.each(getStationsByName(currprevgroupedroute.laststation.name),function(){
 					var start = this;
-					$.each(getChangeStations(start),function(){
-						var change = this;
-						$.each(getStationsByName(change.name),function(){
-
-							var rt = currprevgroupedroute.routes.push(getDirectRoute(start, this));
-							var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
-							newprevgroupedroutes.push(tmpgroupedroute);
-							if (this==es) {
-								reached = true;
-								resgroupedroute = tmpgroupedroute;
-							}
-							
-						});	
-					});
-
+					
+						$.each(getStationsByName(es.name),function(){							
+							if(hasDirectRoute(start, this)){
+									currprevgroupedroute.routes.push(getDirectRoute(start, this));
+									var rt =  currprevgroupedroute.routes;
+									var tmpgroupedroute = new groupedroute(rt, ss, this);
+									reached = true;
+									resgroupedroutes.push(tmpgroupedroute);
+								};
+						});
+							$.each(getChangeStations(start),function(){
+								var change = this;
+								$.each(getStationsByName(change.name),function(){
+									if(hasDirectRoute(start, this)){
+										currprevgroupedroute.routes.push(getDirectRoute(start, this));
+										var rt =  currprevgroupedroute.routes;
+										var tmpgroupedroute = new groupedroute(rt, ss, this);
+										newprevgroupedroutes.push(tmpgroupedroute);
+									};
+								});	
+							});
 				});
 		});
 		
@@ -628,6 +637,14 @@ function getMinGroupedRoute(ss,es){
 		
 	}
 	
+	var minduration = -1;
+		$.each(resgroupedroutes,function(){
+			if(this.duration<minduration || minduration==-1){
+				resgroupedroute = this;
+				minduration=this.duration;
+			}
+	
+		});
 	return resgroupedroute;
 	}
 
