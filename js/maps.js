@@ -378,12 +378,6 @@ function initialize() {
 		}
 	});
 	
-google.maps.event.addListener(map, "rightclick", function(event) {
-    var lat = event.latLng.lat();
-    var lng = event.latLng.lng();
-    // populate yor box/field with lat, lng
-    alert("Lat=" + lat + "; Lng=" + lng);
-});
 }
 
 function searchBox() {
@@ -725,7 +719,8 @@ function drawroute(route) {
 
 
 
-
+//if ($.inArray(this, getStationsByName(startstation.name))>=-1 ) {
+			
 			if (this == startstation) {
 				iconimage = 'images/metrostart.png';
 				//$('#route-list').append("<li data-theme='b' style='text-align: center;'>Start</li>").listview('refresh');
