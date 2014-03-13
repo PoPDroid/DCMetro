@@ -377,6 +377,13 @@ function initialize() {
 			$("#destinationsearchdiv").show();
 		}
 	});
+	
+google.maps.event.addListener(map, "rightclick", function(event) {
+    var lat = event.latLng.lat();
+    var lng = event.latLng.lng();
+    // populate yor box/field with lat, lng
+    alert("Lat=" + lat + "; Lng=" + lng);
+});
 }
 
 function searchBox() {
@@ -503,19 +510,10 @@ function zoom(fitstations) {
 }
 
 function drawShortestRoute(ss, es) {
-	
-	
 	$("#detailsbutton").show();
 	clearOverlays(); mingroupedroute;
 	$('#route-list').empty();
-	
-	
-	
 	mingroupedroute = getMinGroupedRoute(ss,es);
-	
-	
-	
-	
 	var zoomstations = [];
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
 	$.each(mingroupedroute.routes, function() {
@@ -530,39 +528,6 @@ function drawShortestRoute(ss, es) {
 
 	zoom(zoomstations);
 	
-	
-	
-	
-	
-/*
-	$("#detailsbutton").show();
-	clearOverlays(); mingroupedroute;
-	$('#route-list').empty();
-	var mintime = -1;
-	var time = 0;
-	for (var i = 0; i < getRoutesWithStops(ss, es, 4).length; i++) {
-		var currgroupedroute = getRoutesWithStops(ss, es, 4)[i];
-
-		if ((currgroupedroute.duration < mintime) || mintime < 0) {
-			mintime = currgroupedroute.duration;
-			mingroupedroute = currgroupedroute;
-			/////here we must consider whether to take shortest path or least number of stations
-		}
-	};
-	var zoomstations = [];
-	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
-	$.each(mingroupedroute.routes, function() {
-		drawroute(this);
-		$.each(this.stations, function() {
-			zoomstations.push(this);
-		});
-	});
-	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
-	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
-	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
-
-	zoom(zoomstations);*/
-
 }
 
 
@@ -584,13 +549,11 @@ function getMinGroupedRoute(ss,es){
 			} else {
 				$.each(getChangeStations(start), function() {
 					var change = this;
-					$.each(getStationsByName(change.name),function(){
-						if(hasDirectRoute(start, this)){
-							var rt = getDirectRoute(start, this);
-							var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
-							prevgroupedroutes.push(tmpgroupedroute);
-						}
-					});
+					if(hasDirectRoute(start, this)){
+						var rt = getDirectRoute(start, this);
+						var tmpgroupedroute = new groupedroute(new Array(rt), start, this);
+						prevgroupedroutes.push(tmpgroupedroute);
+					}
 				});
 			}
 		});
@@ -607,10 +570,10 @@ function getMinGroupedRoute(ss,es){
 					
 						$.each(getStationsByName(es.name),function(){							
 							if(hasDirectRoute(start, this)){
-								var gr = currprevgroupedroute;
-									gr.routes.push(getDirectRoute(start, this));
-									var rt =  gr.routes;
-									var tmpgroupedroute = new groupedroute(rt, ss, this);
+									var rt = [];
+									rt =  currprevgroupedroute.routes.slice(0);
+									rt.push(getDirectRoute(start, this));
+									var tmpgroupedroute = new groupedroute(rt, currprevgroupedroute.firststation, this);
 									reached = true;
 									resgroupedroutes.push(tmpgroupedroute);
 								};
@@ -618,16 +581,13 @@ function getMinGroupedRoute(ss,es){
 						if(!reached)
 						{
 							$.each(getChangeStations(start),function(){
-								var change = this;
-								$.each(getStationsByName(change.name),function(){
 									if(hasDirectRoute(start, this)){
-								var gr = currprevgroupedroute;
-									gr.routes.push(getDirectRoute(start, this));
-										var rt =  gr.routes;
-										var tmpgroupedroute = new groupedroute(rt, ss, this);
+										var rt = [];
+										rt =  currprevgroupedroute.routes.slice(0);
+										rt.push(getDirectRoute(start, this));
+										var tmpgroupedroute = new groupedroute(rt, currprevgroupedroute.firststation, this);
 										newprevgroupedroutes.push(tmpgroupedroute);
-									};
-								});	
+									}
 							});
 						}
 				});
@@ -753,6 +713,19 @@ function drawroute(route) {
 			else if (destdist >= 1000)
 				destdiststr = " (" + Math.round(destdist / 100) / 10 + "Km from Destination)";
 
+
+
+
+
+//???????????????????????????????????????? fix because of when start != start because of diff colour
+
+
+
+
+
+
+
+
 			if (this == startstation) {
 				iconimage = 'images/metrostart.png';
 				//$('#route-list').append("<li data-theme='b' style='text-align: center;'>Start</li>").listview('refresh');
@@ -787,13 +760,26 @@ function drawroute(route) {
 
 		}
 
+	var colour;
+		if (this.line == "red") {
+			colour = "#FF0000";
+		} else if (this.line == "green") {
+			colour = "#00FF00";
+		} else if (this.line == "blue") {
+			colour = "#0000FF";
+		} else if (this.line == "orange") {
+			colour = "#FF4500";
+		} else if (this.line == "yellow") {
+			colour = "#FFFF00";
+		}
+		
 		var marker = new google.maps.Marker({
 			position : new google.maps.LatLng(this.lat, this.lon),
 			title : this.name,
 			icon : {
 				path : google.maps.SymbolPath.CIRCLE,
-				scale : 4,
-				strokeColor : "#000000"
+				scale : 6,
+				strokeColor : colour
 			},
 			map : map
 		});
@@ -1036,5 +1022,4 @@ function loadScript() {
 	} else
 		alert("offline");
 }
-
 window.onload = loadScript;
