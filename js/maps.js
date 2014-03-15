@@ -4,7 +4,7 @@ var linkdurations = [];
 var startmarker;
 var stopmarker;
 var startgpsposition;
-var myroutes = [];
+var mylines = [];
 var markers = [];
 var polys = [];
 var infowindow;
@@ -21,8 +21,9 @@ var inputstart;
 var inputdest;
 var mapcentrelat = 38.916508;
 var mapcentrelng = -77.028610;
+var shortestpolypath;
 
-var metrojson = '[{"line":"orange", "stations":' +
+var metrojson = '[{"line":"orange", "colour": "#FF4500", "stations":' +
 '[' +
 '{"name":"Vienna/Fairfax","lat":38.877872,"lon":-77.271332,"dist":0,"change":false},' +
 '{"name":"Dunn Loring","lat":38.883099,"lon":-77.228653,"dist":1,"change":false},' +
@@ -51,7 +52,7 @@ var metrojson = '[{"line":"orange", "stations":' +
 '{"name":"Landover","lat":38.933975,"lon":-76.889961,"dist":1,"change":false},' +
 '{"name":"New Carrollton","lat":38.948063,"lon":-76.871727,"dist":1,"change":false}' +
 ']},' +
-'{"line":"blue", "stations":' +
+'{"line":"blue", "colour": "#0000FF", "stations":' +
 '[' +
 '{"name":"Franconia-Springfield","lat":38.766197,"lon":-77.168465,"dist":0,"change":false},' +
 '{"name":"Van Dorn","lat":38.799282,"lon":-77.129066,"dist":1,"change":false},' +
@@ -82,7 +83,7 @@ var metrojson = '[{"line":"orange", "stations":' +
 '{"name":"Morgan Boulevard","lat":38.893555,"lon":-76.868530,"dist":1,"change":false}' +
 //'{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1,"change":false},' +
 ']},' +
-'{"line":"yellow", "stations":' +
+'{"line":"yellow", "colour": "#FFFF00", "stations":' +
 '[' +
 '{"name":"Fort Totten","lat":38.951801,"lon":-77.001862,"dist":0,"change":true},' +
 '{"name":"Georgia Ave-Petworth","lat":38.936096,"lon":-77.024330,"dist":1,"change":false},' +
@@ -102,7 +103,7 @@ var metrojson = '[{"line":"orange", "stations":' +
 '{"name":"Eisenhower Avenue","lat":38.800285,"lon":-77.070854,"dist":1,"change":false},' +
 '{"name":"Huntington","lat":38.793865,"lon":-77.074974,"dist":1,"change":false}' +
 ']},' +
-'{"line":"red", "stations":' +
+'{"line":"red", "colour": "#FF0000", "stations":' +
 '[' +
 '{"name":"Glenmont","lat":39.061398,"lon":-77.053108,"dist":0,"change":false},' +
 '{"name":"Wheaton","lat":39.038620,"lon":-77.050789,"dist":1,"change":false},' +
@@ -132,7 +133,7 @@ var metrojson = '[{"line":"orange", "stations":' +
 '{"name":"Rockville","lat":39.084438,"lon":-77.145836,"dist":1,"change":false},' +
 '{"name":"Shady Grove","lat":39.119972,"lon":-77.164795,"dist":1,"change":false,"change":false}' +
 ']},' +
-'{"line":"green", "stations":' +
+'{"line":"green", "colour": "#00FF00", "stations":' +
 '[' +
 '{"name":"Branch Avenue","lat":38.827023,"lon":-76.911827,"dist":0,"change":false},' +
 '{"name":"Suitland","lat":38.843819,"lon":-76.931633,"dist":1,"change":false},' +
@@ -156,6 +157,14 @@ var metrojson = '[{"line":"orange", "stations":' +
 '{"name":"College Park-U of Md","lat":38.978378,"lon":-76.927811,"dist":1,"change":false},' +
 '{"name":"Greenbelt","lat":39.010998,"lon":-76.911270,"dist":1,"change":false}' +
 ']}]';
+
+//route constructor
+function lineroute(name, route, colour) {
+	//durations.length = stations.length because durations = duration of corresponding station from last station
+	this.name = name;
+	this.route = route;
+	this.colour = colour;
+}
 
 function station(stationid, name, line, lat, lon, change) {
 	this.stationid = stationid;
@@ -201,7 +210,7 @@ function loadMain() {
 
 	$.mobile.changePage("#mainPage");
 	google.maps.event.trigger(map, 'resize');
-	zoom(mingroupedroute);
+	//zoom(mingroupedroute);
 }
 
 function initialize() {
@@ -269,8 +278,12 @@ function initialize() {
 
 	});
 
-	drawrfixedroutes(myroutes);
-	//zoom(allstations);
+	drawrfixedroutes(mylines);
+	zoom(allstations);
+	var listener = google.maps.event.addListener(map, "idle", function() { 
+	  map.setZoom(map.getZoom()+1); 
+	  google.maps.event.removeListener(listener); 
+	});
 	searchBox();
 	$("#select-choice-start").val("search-start");
 	google.maps.event.trigger(map, 'resize');
@@ -396,7 +409,7 @@ function searchBox() {
 	var searchBoxDest = new google.maps.places.SearchBox((inputdest));
 	google.maps.event.addListener(searchBoxStart, 'places_changed', function() {
 		map.controls[google.maps.ControlPosition.TOP].pop(inputstart);
-		searching = false;
+		searchingstart = false;
 		$("#startsearchdiv").hide();
 		var places = searchBoxStart.getPlaces();
 		startmarker.setPosition(places[0].geometry.location);
@@ -474,8 +487,8 @@ function populateListViews() {
 
 	var output = '';
 	$.each(allstations, function() {
-		$('#stations-start').append("<li onclick='setStartStation(" + this.stationid + ")'  class='ui-screen-hidden' ><a>" + this.name + "</a></li>");
-		$('#stations-dest').append("<li onclick='setEndStation(" + this.stationid + ")' class='ui-screen-hidden' ><a>" + this.name + "</a></li>");
+		$('#stations-start').append("<li onclick='setStartStation(\"" + this.stationid + "\")'  class='ui-screen-hidden' ><a>" + this.stationid + "</a></li>");
+		$('#stations-dest').append("<li onclick='setEndStation(\"" + this.stationid + "\")' class='ui-screen-hidden' ><a>" + this.stationid + "</a></li>");
 	});
 	$('#stations-start').listview('refresh');
 	$('#stations-dest').listview('refresh');
@@ -500,7 +513,8 @@ function zoom(fitstations) {
 	bounds.extend(startmarker.getPosition());
 	bounds.extend(stopmarker.getPosition());
 	map.fitBounds(bounds);
-	//map.setZoom(map.getZoom() );
+	
+
 }
 
 function drawShortestRoute(ss, es) {
@@ -510,12 +524,42 @@ function drawShortestRoute(ss, es) {
 	mingroupedroute = getMinGroupedRoute(ss,es);
 	var zoomstations = [];
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
+
+	var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+    scale: 8,
+    strokeColor: "#000000"
+  	};
+	var polyOptions = {
+		strokeColor : "#FFFFFF",
+		strokeOpacity : 1,
+		strokeWeight : 9,    icons: [{
+      icon: lineSymbol,
+      offset: '100%'
+    }],
+	};
+	
+	var polyline = new google.maps.Polyline(polyOptions);
+	polyline.setMap(map);
+	polys.push(polyline);
+	shortestpolypath = polyline.getPath();
+	
 	$.each(mingroupedroute.routes, function() {
 		drawroute(this);
 		$.each(this.stations, function() {
 			zoomstations.push(this);
 		});
 	});
+	
+	var count = 0;
+    window.setInterval(function() {
+	      count = (count + 1) % 300;
+	
+	      var icons = polyline.get('icons');
+	      icons[0].offset = (count / 2.6) + '%';
+	      polyline.set('icons', icons);
+	  }, 20);
+	  
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
 	$('#route-list').append("<li data-theme='c'></li>").listview('refresh');
 	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
@@ -524,6 +568,31 @@ function drawShortestRoute(ss, es) {
 	
 }
 
+function drawWalkingLine(strt,stp){
+	  // Define a symbol using SVG path notation, with an opacity of 1.
+  var lineSymbol = {
+    path: 'M 0,-1 0,1',
+    strokeOpacity: 1,
+    scale: 4
+  };
+
+  var lineCoordinates = [
+    strt,
+    stp
+  ];
+
+  var line = new google.maps.Polyline({
+    path: lineCoordinates,
+    strokeOpacity: 0,
+    icons: [{
+      icon: lineSymbol,
+      offset: '0',
+      repeat: '20px'
+    }],
+    map: map
+  });
+	polys.push(line);
+}
 
 function getMinGroupedRoute(ss,es){
 	var reached =false;
@@ -671,10 +740,11 @@ function getDirectRoute(fromstation, tostation) {
 
 function drawroute(route) {
 
+
 	var polyOptions = {
-		strokeColor : "#FFFFFF",
+		strokeColor : getStationColour(route.stations[0]),
 		strokeOpacity : 1,
-		strokeWeight : 4,
+		strokeWeight : 4
 	};
 
 	var poly = new google.maps.Polyline(polyOptions);
@@ -685,9 +755,8 @@ function drawroute(route) {
 	var curr = 0;
 	$.each(route.stations, function() {
 		path.push(new google.maps.LatLng(this.lat, this.lon));
-
-		if (this == startstation || curr == 0 || this == endstation) {
-
+		shortestpolypath.push(new google.maps.LatLng(this.lat, this.lon));
+		if (this.name == startstation.name || curr == 0 || this.name == endstation.name) {
 			var stats = route.stations.length - 2;
 			if (stats == -1)
 				stats = 0;
@@ -706,39 +775,24 @@ function drawroute(route) {
 				destdiststr = " (" + destdist + "m from Destination)";
 			else if (destdist >= 1000)
 				destdiststr = " (" + Math.round(destdist / 100) / 10 + "Km from Destination)";
-
-
-
-
-
-//???????????????????????????????????????? fix because of when start != start because of diff colour
-
-
-
-
-
-
-
-//if ($.inArray(this, getStationsByName(startstation.name))>=-1 ) {
-			
-			if (this == startstation) {
+			drawWalkingLine(startmarker.position,new google.maps.LatLng(startstation.lat, startstation.lon));
+			drawWalkingLine(stopmarker.position,new google.maps.LatLng(endstation.lat, endstation.lon));
+			if (this.name == startstation.name) {
 				iconimage = 'images/metrostart.png';
-				//$('#route-list').append("<li data-theme='b' style='text-align: center;'>Start</li>").listview('refresh');
-				$('#route-list').append("<li data-theme='a'style='text-align: center;'>Start from: " + this.name + startdiststr + "</li>").listview('refresh');
-				$('#route-list').append("<li data-theme='d' style='text-align: center;'>(Pass " + stats + " stations)</li>").listview('refresh');
-			} else if (this == endstation) {
+				$('#route-list').append("<li data-theme='a'style='text-align: center;color:"+getStationColour(this)+";'>Start from: <br /> " + this.name +"<br />("+this.line+" line) <br />" + startdiststr + "</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Pass " + stats + " stations <br />("+this.line+" line)</li>").listview('refresh');
+			} else if (this.name == endstation.name) {
 				iconimage = 'images/metrodest.png';
-				$('#route-list').append("<li data-theme='a' style='text-align: center;'>Stop at: " + this.name + destdiststr + "</li>").listview('refresh');
-				//$('#route-list').append("<li data-theme='b'style='text-align: center;'>Destination</li>").listview('refresh');
-			} else if (curr == 0 && this != endstation && this != startstation) {
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Stop at: <br />" + this.name +"<br />" + destdiststr + "</li>").listview('refresh');
+			} else if (curr == 0 && this.name != endstation.name && this.name != startstation.name) {
 				iconimage = 'images/metro.png';
-				$('#route-list').append("<li data-theme='a' style='text-align: center;'>Change at: " + this.name + "</li>").listview('refresh');
-				$('#route-list').append("<li data-theme='d' style='text-align: center;' >(Pass " + stats + " stations)</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Change at: <br />"+this.name+" <br />(" + this.line + " line)</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";' >Pass " + stats + " stations <br />("+this.line+" line)</li>").listview('refresh');
 			}
 			if (startstation == endstation) {
 				iconimage = 'images/metrodest.png';
-				$('#route-list').append("<li data-theme='a' style='text-align: center;'>" + this.name + "</li>").listview('refresh');
-				$('#route-list').append("<li data-theme='b'style='text-align: center;'>Destination</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>" + this.name + "</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a'style='text-align: center;color:"+getStationColour(this)+";'>Destination</li>").listview('refresh');
 
 			}
 			var marker = new google.maps.Marker({
@@ -755,25 +809,14 @@ function drawroute(route) {
 
 		}
 
-	var colour;
-		if (this.line == "red") {
-			colour = "#FF0000";
-		} else if (this.line == "green") {
-			colour = "#00FF00";
-		} else if (this.line == "blue") {
-			colour = "#0000FF";
-		} else if (this.line == "orange") {
-			colour = "#FF4500";
-		} else if (this.line == "yellow") {
-			colour = "#FFFF00";
-		}
+	var colour = getStationColour(this);
 		
 		var marker = new google.maps.Marker({
 			position : new google.maps.LatLng(this.lat, this.lon),
 			title : this.name,
 			icon : {
 				path : google.maps.SymbolPath.CIRCLE,
-				scale : 6,
+				scale : 4,
 				strokeColor : colour
 			},
 			map : map
@@ -786,6 +829,18 @@ function drawroute(route) {
 		});
 		curr++;
 	});
+	
+
+}
+
+
+function getStationColour(stat){
+	var res;
+	$.each(mylines,function(){
+		if (stat.line==this.name)
+			res = this.colour;
+	});
+	return res;
 }
 
 function onItemClick(event, pin) {
@@ -909,9 +964,9 @@ function getLinkDuration(fromstation, tostation) {
 
 function getRouteByName(name) {
 	var resroute;
-	$.each(myroutes, function() {
-		if (this.name == name) {
-			resroute = this;
+	$.each(mylines, function() {
+		if (this.route.name == name) {
+			resroute = this.route;
 		}
 	});
 	return resroute;
@@ -959,9 +1014,9 @@ $(document).ready(function() {
 
 	$.each(json, function(index, value) {
 		var stationarr = [];
-		var line = value.line;
+		var linename = value.line;
 		$.each(value.stations, function() {
-			var stat = new station(line + this.name, this.name, line, this.lat, this.lon, this.change);
+			var stat = new station(this.name + "-"+ linename , this.name, linename, this.lat, this.lon, this.change);
 			stationarr.push(stat);
 			allstations.push(stat);
 			if (stationarr.length > 1) {
@@ -969,28 +1024,19 @@ $(document).ready(function() {
 			}
 		});
 		stationarrs.push(stationarr);
-		var newroute = new route(line, stationarr);
-		myroutes.push(newroute);
+		var newroute = new route(linename, stationarr);
+		var col = value.colour;
+		var newline = new lineroute(linename,newroute,col);
+		mylines.push(newline);
 	});
 	populateListViews();
 });
 
 
-function drawrfixedroutes(routes) {
+function drawrfixedroutes(lines) {
 
-	$.each(routes, function() {
-		var colour = "";
-		if (this.name == "red") {
-			colour = "#FF0000";
-		} else if (this.name == "green") {
-			colour = "#00FF00";
-		} else if (this.name == "blue") {
-			colour = "#0000FF";
-		} else if (this.name == "orange") {
-			colour = "#FF4500";
-		} else if (this.name == "yellow") {
-			colour = "#FFFF00";
-		}
+	$.each(lines, function() {
+		var colour = this.colour;
 		var polyOptions = {
 			strokeColor : colour,
 			strokeOpacity : 0.5,
@@ -1000,7 +1046,7 @@ function drawrfixedroutes(routes) {
 		poly.setMap(map);
 		var path = poly.getPath();
 
-		$.each(this.stations, function() {
+		$.each(this.route.stations, function() {
 			path.push(new google.maps.LatLng(this.lat, this.lon));
 
 		});
