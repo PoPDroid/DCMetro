@@ -7,6 +7,7 @@ var startgpsposition;
 var mylines = [];
 var markers = [];
 var polys = [];
+var fixedpolys = [];
 var infowindow;
 var startstation;
 var touchoption = "none";
@@ -278,7 +279,7 @@ function initialize() {
 
 	});
 
-	drawrfixedroutes(mylines);
+	drawfixedroutes(mylines);
 	zoom(allstations);
 	var listener = google.maps.event.addListener(map, "idle", function() { 
 	  map.setZoom(map.getZoom()+1); 
@@ -565,7 +566,9 @@ function drawShortestRoute(ss, es) {
 	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
 
 	zoom(zoomstations);
-	
+	$.each(fixedpolys,function(){
+		this.setOptions({strokeOpacity: 0.3});
+	});
 }
 
 function drawWalkingLine(strt,stp){
@@ -1033,7 +1036,7 @@ $(document).ready(function() {
 });
 
 
-function drawrfixedroutes(lines) {
+function drawfixedroutes(lines) {
 
 	$.each(lines, function() {
 		var colour = this.colour;
@@ -1044,6 +1047,7 @@ function drawrfixedroutes(lines) {
 		};
 		var poly = new google.maps.Polyline(polyOptions);
 		poly.setMap(map);
+		fixedpolys.push(poly);
 		var path = poly.getPath();
 
 		$.each(this.route.stations, function() {
