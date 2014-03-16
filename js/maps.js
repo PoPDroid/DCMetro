@@ -781,10 +781,10 @@ function drawroute(route) {
 			
 			var startwalkingdirections = "";
 			if(startdist>0) 
-				startwalkingdirections ="<br/><a href = 'http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'>Get Directions</a>";
+				startwalkingdirections ="<br/><a href = 'http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
 			var destwalkingdirections = "";
 			if(destdist>0) 
-			 	destwalkingdirections="<br/><a href = 'http://maps.google.com/maps?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'>Get Directions</a>";
+			 	destwalkingdirections="<br/><a href = 'http://maps.google.com/maps?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
 			drawWalkingLine(startmarker.position,new google.maps.LatLng(startstation.lat, startstation.lon));
 			drawWalkingLine(stopmarker.position,new google.maps.LatLng(endstation.lat, endstation.lon));
 			if (this.name == startstation.name) {
