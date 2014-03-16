@@ -784,12 +784,16 @@ function drawroute(route) {
 				if(navigator.userAgent.match(/iPhone|iPad|iPod/i))
 				startwalkingdirections ="<br/><a href = 'http://maps.apple.com/?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
 				else			
-				startwalkingdirections ="<br/><a href = 'http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
-				
+				startwalkingdirections ="<br/><a href='#' onclick=\"window.open('http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w', '_system');\">Get Directions!</a>";
 			}
 			var destwalkingdirections = "";
-			if(destdist>0) 
+			if(destdist>0){
+				if(navigator.userAgent.match(/iPhone|iPad|iPod/i))
+			 	destwalkingdirections="<br/><a href = 'http://maps.apple.com/?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
+				else			
 			 	destwalkingdirections="<br/><a href = 'http://maps.google.com/maps?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
+				
+			} 
 			drawWalkingLine(startmarker.position,new google.maps.LatLng(startstation.lat, startstation.lon));
 			drawWalkingLine(stopmarker.position,new google.maps.LatLng(endstation.lat, endstation.lon));
 			if (this.name == startstation.name) {
