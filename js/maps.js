@@ -780,8 +780,13 @@ function drawroute(route) {
 				destdiststr = " (" + Math.round(destdist / 100) / 10 + "Km from Destination)";
 			
 			var startwalkingdirections = "";
-			if(startdist>0) 
+			if(startdist>0) {
+				if(navigator.userAgent.match(/iPhone|iPad|iPod/i))
+				startwalkingdirections ="<br/><a href = 'http://maps.apple.com/?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
+				else			
 				startwalkingdirections ="<br/><a href = 'http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
+				
+			}
 			var destwalkingdirections = "";
 			if(destdist>0) 
 			 	destwalkingdirections="<br/><a href = 'http://maps.google.com/maps?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'  target='_blank'>Get Directions</a>";
