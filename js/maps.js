@@ -771,22 +771,29 @@ function drawroute(route) {
 			var startdiststr = "";
 			var destdiststr = "";
 			if (startdist > 0.1 && startdist < 1000)
-				startdiststr = " (" + startdist + "m from Starting Point)";
+				startdiststr = " (" + startdist + "m from Starting Point)  ";
 			else if (startdist >= 1000)
 				startdiststr = " (" + Math.round(startdist / 100) / 10 + "Km from Starting Point)";
 			if (destdist > 0.1 && destdist < 1000)
 				destdiststr = " (" + destdist + "m from Destination)";
 			else if (destdist >= 1000)
 				destdiststr = " (" + Math.round(destdist / 100) / 10 + "Km from Destination)";
+			
+			var startwalkingdirections = "";
+			if(startdist>0) 
+				startwalkingdirections ="<br/><a href = 'http://maps.google.com/maps?saddr=" +startmarker.position.lat()+ ","+ startmarker.position.lng()+"&daddr="+startstation.lat+ "," + startstation.lon+"&dirflg=w'>Get Directions</a>";
+			var destwalkingdirections = "";
+			if(destdist>0) 
+			 	destwalkingdirections="<br/><a href = 'http://maps.google.com/maps?saddr=" +stopmarker.position.lat()+ ","+ stopmarker.position.lng()+"&daddr="+endstation.lat+ "," + endstation.lon+"&dirflg=w'>Get Directions</a>";
 			drawWalkingLine(startmarker.position,new google.maps.LatLng(startstation.lat, startstation.lon));
 			drawWalkingLine(stopmarker.position,new google.maps.LatLng(endstation.lat, endstation.lon));
 			if (this.name == startstation.name) {
 				iconimage = 'images/metrostart.png';
-				$('#route-list').append("<li data-theme='a'style='text-align: center;color:"+getStationColour(this)+";'>Start from: <br /> " + this.name +"<br />("+this.line+" line) <br />" + startdiststr + "</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a'style='text-align: center;color:"+getStationColour(this)+";'>Start from: <br /> " + this.name +"<br />("+this.line+" line) <br />" + startdiststr + "</li> "+startwalkingdirections).listview('refresh');
 				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Pass " + stats + " stations <br />("+this.line+" line)</li>").listview('refresh');
 			} else if (this.name == endstation.name) {
 				iconimage = 'images/metrodest.png';
-				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Stop at: <br />" + this.name +"<br />" + destdiststr + "</li>").listview('refresh');
+				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Stop at: <br />" + this.name +"<br />" + destdiststr + "</li>"+destwalkingdirections).listview('refresh');
 			} else if (curr == 0 && this.name != endstation.name && this.name != startstation.name) {
 				iconimage = 'images/metro.png';
 				$('#route-list').append("<li data-theme='a' style='text-align: center;color:"+getStationColour(this)+";'>Change at: <br />"+this.name+" <br />(" + this.line + " line)</li>").listview('refresh');
@@ -1033,8 +1040,23 @@ $(document).ready(function() {
 		mylines.push(newline);
 	});
 	populateListViews();
+	
+	
+        var options = new ContactFindOptions();
+        options.filter="";          // empty search string returns all contacts
+        options.multiple=true;      // return multiple results
+        filter = ["displayName"];   // return contact.displayName field
+
+        // find contacts
+        navigator.contacts.find(filter, onSuccess, onError, options);
+        
 });
 
+    function onSuccess(contacts) {
+        for (var i=0; i<contacts.length; i++) {
+            alert(contacts[i].displayName);
+        }
+    };
 
 function drawfixedroutes(lines) {
 
@@ -1068,3 +1090,4 @@ function loadScript() {
 		alert("offline");
 }
 window.onload = loadScript;
+
