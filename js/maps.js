@@ -684,6 +684,9 @@ function drawroute(route) {
 				map : map,
 				icon : iconimage
 			});
+			var infowindow = new google.maps.InfoWindow();
+                infowindow.setContent(marker.title);
+    		infowindow.open(map,marker);
 			markers.push(marker);
 			// Listen for click event
 			google.maps.event.addListener(marker, 'click', function() {
