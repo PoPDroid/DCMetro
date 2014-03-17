@@ -20,8 +20,8 @@ var searchingdest = false;
 var searchingstart = false;
 var inputstart;
 var inputdest;
-var mapcentrelat = 38.916508;
-var mapcentrelng = -77.028610;
+var mapcentrelat ;
+var mapcentrelng ;
 var shortestpolypath;
 
 //route constructor
@@ -430,6 +430,7 @@ function drawShortestRoute(ss, es) {
 	$('#route-list').append("<li data-theme='b' style='text-align: center;'>Number of interchanges: " + (mingroupedroute.routes.length - 1) + "</li>").listview('refresh');
 
 	zoom(zoomstations);
+	
 	$.each(fixedpolys,function(){
 		this.setOptions({strokeOpacity: 0.3});
 	});
@@ -684,9 +685,14 @@ function drawroute(route) {
 				map : map,
 				icon : iconimage
 			});
+			
+
+/*
 			var infowindow = new google.maps.InfoWindow();
                 infowindow.setContent(marker.title);
     		infowindow.open(map,marker);
+*/
+
 			markers.push(marker);
 			// Listen for click event
 			google.maps.event.addListener(marker, 'click', function() {
@@ -695,7 +701,7 @@ function drawroute(route) {
 
 		}
 
-	var colour = getStationColour(this);
+		var colour = getStationColour(this);
 		
 		var marker = new google.maps.Marker({
 			position : new google.maps.LatLng(this.lat, this.lon),
@@ -898,8 +904,10 @@ function onError(error) {
 $(document).ready(function() {
 	
 $.getJSON("metro.json",function(json){
-			$.each(json,function(index,value){
-						var stationarr = [];
+mapcentrelat = json.mapcentrelat ;
+mapcentrelng = json.mapcentrelng ;
+	$.each(json.lines,function(index,value){
+		var stationarr = [];
 		var linename = value.line;
 		$.each(value.stations, function() {
 			var stat = new station(this.name + "-"+ linename , this.name, linename, this.lat, this.lon, this.change);

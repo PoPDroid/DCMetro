@@ -1,4 +1,8 @@
-[
+{
+"metro":"DC Metro",
+"mapcentrelat":38.916508,
+"mapcentrelng":-77.028610,
+"lines":[
 {
 "line":"orange", "colour": "#FF4500", "stations":
 [
@@ -143,3 +147,4 @@
 ]
 }
 ]
+}
